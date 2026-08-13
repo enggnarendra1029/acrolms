@@ -8,21 +8,23 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 24 # Upgraded to match moodlemobile@5.3.0 requirements
+          node-version: 24
 
       - uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      # Installed with engine legacy fallback to prevent setup interruption
+      # Install local packages including Capacitor binaries
       - run: npm install --legacy-peer-deps --no-engine-strict
 
-      - run: npx cap add android
+      # Fix: Call local capacitor binary instead of global npx lookup
+      - run: ./node_modules/.bin/cap add android
 
       - run: npm run build -- --configuration=production
 
-      - run: npx cap sync android
+      # Fix: Call local capacitor binary for sync execution
+      - run: ./node_modules/.bin/cap sync android
 
       - run: chmod +x android/gradlew
 
