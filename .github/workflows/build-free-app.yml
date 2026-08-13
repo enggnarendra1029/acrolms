@@ -15,16 +15,11 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      # Install local packages including Capacitor binaries
-      - run: npm install --legacy-peer-deps --no-engine-strict
+      # Clean installation to ensure dependencies deploy correctly
+      - run: npm ci --legacy-peer-deps --no-engine-strict || npm install --legacy-peer-deps --no-engine-strict
 
-      # Fix: Call local capacitor binary instead of global npx lookup
-      - run: ./node_modules/.bin/cap add android
-
-      - run: npm run build -- --configuration=production
-
-      # Fix: Call local capacitor binary for sync execution
-      - run: ./node_modules/.bin/cap sync android
+      # Use the direct npm script bundled inside Moodle's package.json
+      - run: npm run dev:android
 
       - run: chmod +x android/gradlew
 
