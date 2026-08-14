@@ -10,85 +10,124 @@ jobs:
 
     steps:
 
+      # --------------------------------------------------
       # 1. Checkout source code
+      # --------------------------------------------------
       - name: Checkout source code
         uses: actions/checkout@v4
 
+      # --------------------------------------------------
       # 2. Setup Node.js
       # Moodle App 5.3.0 requires Node >=24.16 <25
+      # --------------------------------------------------
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '24.16.0'
           cache: npm
 
-      # 3. Setup Java
+      # --------------------------------------------------
+      # 3. Setup Java 17
+      # --------------------------------------------------
       - name: Setup Java 17
         uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
+      # --------------------------------------------------
       # 4. Check environment
+      # --------------------------------------------------
       - name: Check versions
         run: |
-          echo "Node:"
+          echo "Node version:"
           node --version
 
-          echo "NPM:"
+          echo "NPM version:"
           npm --version
 
-          echo "Java:"
+          echo "Java version:"
           java -version
 
-          echo "Cordova:"
+          echo "Cordova version:"
           npx cordova --version
 
+      # --------------------------------------------------
       # 5. Install dependencies
+      # --------------------------------------------------
       - name: Install dependencies
         run: |
           npm ci --legacy-peer-deps
 
+      # --------------------------------------------------
       # 6. Build Moodle web application
+      # --------------------------------------------------
       - name: Build Moodle web application
         run: |
           npm run build
 
+      # --------------------------------------------------
       # 7. Build Moodle Cordova plugin
+      # --------------------------------------------------
       - name: Build Moodle Cordova plugin
         run: |
           npm run prod --prefix cordova-plugin-moodleapp
 
-      # 8. Add Android platform
-      # This creates the android/ directory
-      # No emulator is required
+      # --------------------------------------------------
+      # 8. Add Android Cordova platform
+      # Creates platforms/android/
+      # --------------------------------------------------
       - name: Add Android platform
         run: |
           npx cordova platform add android
 
+      # --------------------------------------------------
       # 9. Prepare Android project
+      # --------------------------------------------------
       - name: Prepare Android project
         run: |
           npx cordova prepare android
 
-      # 10. Build Debug APK
-      # Direct Cordova build - does NOT use native-run
+      # --------------------------------------------------
+      # 10. Build Android APK
+      # Does NOT use native-run or an emulator
+      # --------------------------------------------------
       - name: Build Android Debug APK
         run: |
           npx cordova build android --debug --verbose
 
-      # 11. Locate generated APK
-      - name: Find APK
+      # --------------------------------------------------
+      # 11. Find generated APK
+      # --------------------------------------------------
+      - name: Find generated APK
         run: |
-          echo "Generated APK files:"
-          find android -type f -name "*.apk" -print
+          echo "Searching for generated APK files..."
 
-      # 12. Upload APK
-      - name: Upload APK
+          find platforms/android -type f -name "*.apk" -print
+
+      # --------------------------------------------------
+      # 12. Verify APK exists
+      # --------------------------------------------------
+      - name: Verify APK
+        run: |
+          APK=$(find platforms/android -type f -name "*.apk" | head -n 1)
+
+          if [ -z "$APK" ]; then
+            echo "ERROR: APK was not generated."
+            exit 1
+          fi
+
+          echo "APK successfully generated:"
+          ls -lh "$APK"
+
+      # --------------------------------------------------
+      # 13. Upload APK
+      # --------------------------------------------------
+      - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
           name: moodle-android-debug
           path: |
-            android/app/build/outputs/apk/debug/*.apk
-            android/app/build/outputs/apk/*.apk
+            platforms/android/app/build/outputs/apk/debug/*.apk
+            platforms/android/app/build/outputs/apk/*.apk
           if-no-files-found: error
