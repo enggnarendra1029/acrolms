@@ -87,7 +87,9 @@
         "high": 120
     },
     "customurlscheme": "moodlemobile",
-    "sites": [],
+    "sites": [ {
+        "url": "http://47.29.0.163/acropolislms/"
+    }],
     "multisitesdisplay": "",
     "sitefindersettings": {},
     "onlyallowlistedsites": false,
