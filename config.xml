@@ -3,7 +3,7 @@
     <name>Acropolis_LMS</name>
     <description>Acropolis Institute of Technology and Research Learning Management System</description>
     <author email="narendrasingh@acropois.in" href="http://aitr.ac.in">LMS Team</author>
-    <content src="http://47.29.0.163/acropolislms/"/>
+    <content src="index.html">
     <access origin="*" />
     <access launch-external="yes" origin="tel:*" />
     <access launch-external="yes" origin="mailto:*" />
